@@ -1,0 +1,10 @@
+const float An1r = 5.3;
+int L4c = 10;
+float G_9d = -3.4;
+int C7bc; 
+begin 
+if( C7bc >= 0 ) { 
+    L4c = 5.1 + 3.1;
+    L4c = C7bc + 9; 
+    } 
+end

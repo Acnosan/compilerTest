@@ -1,0 +1,1 @@
+flex lexCode.l && bison -d parser.y && gcc lex.yy.c parser.tab.c -o output
