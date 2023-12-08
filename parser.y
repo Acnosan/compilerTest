@@ -74,6 +74,7 @@ void verifyDoubleDeclaration(list *linkedL){
             while(nextNode){
                 if(strcmp(currNode->data.name,nextNode->data.name) == 0 && strcmp(currNode->data.type,nextNode->data.type) != 0){
                     printf("Error DOUBLE DECLARATION \t %s has two types [ %s : %s]",currNode->data.name,currNode->data.type,nextNode->data.type);
+                    printf("\nEXIT PROGRAM With Error .... "); 
                     exit(EXIT_FAILURE);}
                 nextNode = nextNode->next; 
             }
@@ -112,7 +113,8 @@ int verifyCompatibility(list *linkedL,char *type){
 
         if ( strcmp(linkedL->data.type,type) == 0 ) return 1;
         else{
-            printf("Line: %d , Error Type Compatibility Variable { %s } is not '%s' , its a '%s'",nbrLine,linkedL->data.name,type,linkedL->data.type);
+            fprintf(stderr,"Line: %d , Error Type Compatibility Variable { %s } is not '%s' , its a '%s'",nbrLine,linkedL->data.name,type,linkedL->data.type);
+            printf("\nEXIT PROGRAM With Error .... "); 
             return 0;
         }
 }
@@ -126,7 +128,8 @@ void verifyDeclaration(list *linkedL,char *name,char *type){
         }
         linkedL = linkedL->next;
     }
-    printf("\nLine: %d , Error The Variable { %s } Not Declared",nbrLine,name);
+    fprintf(stderr,"\nLine: %d , Error The Variable { %s } Not Declared",nbrLine,name);
+    printf("\nEXIT PROGRAM With Error .... "); 
     exit(EXIT_FAILURE);
 }
 
@@ -135,7 +138,8 @@ void verifyIsConst(list *linkedL,char *name,char *type){
     while(linkedL != NULL){
         if( strcmp(linkedL->data.name,name) == 0  ){
             if( strcmp(linkedL->data.isConst,"true") == 0 ){
-                printf("Line : %d , Const Variable { %s } Changed Value",nbrLine,name);
+                fprintf(stderr,"Line : %d , Const Variable { %s } Changed Value",nbrLine,name);
+                printf("\nEXIT PROGRAM With Error .... "); 
                 exit(EXIT_FAILURE);
             }
             if ( verifyCompatibility(linkedL,type) == 1 ) return ;
@@ -143,7 +147,8 @@ void verifyIsConst(list *linkedL,char *name,char *type){
         }
         linkedL = linkedL->next;
     }
-    printf("\nLine: %d , Error The Variable { %s } Not Declared",nbrLine,name);
+    fprintf(stderr,"\nLine: %d , Error The Variable { %s } Not Declared",nbrLine,name);
+    printf("\nEXIT PROGRAM With Error .... "); 
     exit(EXIT_FAILURE);
 }
 

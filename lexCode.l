@@ -24,6 +24,7 @@ boolC "true"|"false"
 biOp "+"|"-"|"*"|"/"
 compOp "=="|"<"|">"|"<="|">="
 countOp "++"|"--"|"*"|"/"
+comment \/(.)*\/
 
 str {digit}|{char}
 idf [A-Z]({str}|"_"{str})+
@@ -31,6 +32,7 @@ idf [A-Z]({str}|"_"{str})+
 %%
 [ \t] ;
 [\n] {nbrLine = nbrLine + 1; }
+{comment} ;
 
 "begin"  { yylval.strV = strdup(yytext); return BEG;}
 "end"    { yylval.strV = strdup(yytext); return END;}
