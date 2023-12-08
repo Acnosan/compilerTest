@@ -117,7 +117,20 @@ int verifyCompatibility(list *linkedL,char *type){
         }
 }
 
-void verifyDeclarationAndConst(list *linkedL,char *name,char *type){
+void verifyDeclaration(list *linkedL,char *name,char *type){
+
+    while(linkedL != NULL){
+        if( strcmp(linkedL->data.name,name) == 0  ){
+            if ( verifyCompatibility(linkedL,type) == 1 ) return ;
+                else{exit(EXIT_FAILURE);}
+        }
+        linkedL = linkedL->next;
+    }
+    printf("\nLine: %d , Error The Variable { %s } Not Declared",nbrLine,name);
+    exit(EXIT_FAILURE);
+}
+
+void verifyIsConst(list *linkedL,char *name,char *type){
 
     while(linkedL != NULL){
         if( strcmp(linkedL->data.name,name) == 0  ){
@@ -125,13 +138,11 @@ void verifyDeclarationAndConst(list *linkedL,char *name,char *type){
                 printf("Line : %d , Const Variable { %s } Changed Value",nbrLine,name);
                 exit(EXIT_FAILURE);
             }
-            list *checkL = linkedL;
-            if ( verifyCompatibility(checkL,type) == 1 ) return ;
+            if ( verifyCompatibility(linkedL,type) == 1 ) return ;
                 else{exit(EXIT_FAILURE);}
         }
         linkedL = linkedL->next;
     }
-
     printf("\nLine: %d , Error The Variable { %s } Not Declared",nbrLine,name);
     exit(EXIT_FAILURE);
 }
@@ -148,7 +159,7 @@ void verifyDeclarationAndConst(list *linkedL,char *name,char *type){
 %token <strV>BEG <strV>END
 %token <strV>INT <strV>FLOAT <strV>BOOL <strV>CONST
 %token <intV>DIG <intV>NUMBER <floatV>FLOATnum <booleanV>BOOLc <strV>CHAR <strV>IDF
-%token <strV>SEMI <strV>EQ <strV>OP <strV>COMP
+%token <strV>SEMI <strV>EQ <strV>OP <strV>COMP <strV>CNT 
 %token <strV>LP <strV>RP <strV>LC <strV>RC <strV>IF <strV>ELSE <strV>FOR <strV>WHILE
 
 %start beg
@@ -169,7 +180,7 @@ declaration:INT IDF SEMI { linkedL = addUnit(linkedL,$1,$2,"idf","false");
     |BOOL IDF SEMI { linkedL = addUnit(linkedL,$1,$2,"idf","false"); 
                     linkedL = addUnit(linkedL,"SemiColon",$3,"endKey","");
                      }
-    |INT IDF EQ NUMBER SEMI { linkedL = addUnit(linkedL,$1,$2,"idf","false");
+    |INT IDF EQ num SEMI { linkedL = addUnit(linkedL,$1,$2,"idf","false");
                                   linkedL = addUnit(linkedL,"operator",$3,"keyEQ","");
                                   linkedL = addUnit(linkedL,"SemiColon",$5,"endKey","");
                                    }
@@ -181,7 +192,7 @@ declaration:INT IDF SEMI { linkedL = addUnit(linkedL,$1,$2,"idf","false");
                                   linkedL = addUnit(linkedL,"operator",$3,"keyEQ","");
                                   linkedL = addUnit(linkedL,"SemiColon",$5,"endKey","");
                                    }
-    |CONST INT IDF EQ NUMBER SEMI {  linkedL = addUnit(linkedL,$2,$3,"idf","true");
+    |CONST INT IDF EQ num SEMI {  linkedL = addUnit(linkedL,$2,$3,"idf","true");
                                   linkedL = addUnit(linkedL,"SemiColon",$6,"endKey","");
                                    }
     |CONST FLOAT IDF EQ FLOATnum SEMI { linkedL = addUnit(linkedL,$2,$3,"idf","true");
@@ -205,60 +216,48 @@ code: assign code
 
 assign: IDF EQ IDF OP IDF SEMI { char *type = getTypeOfVar(declaredVar,$1);
                                     if( strcmp(type,"bool") != 0 ){
-                                        verifyDeclarationAndConst(declaredVar,$1,type);
-                                        verifyDeclarationAndConst(declaredVar,$3,type);
-                                        verifyDeclarationAndConst(declaredVar,$5,type);
-                                    }else{
-                                        verifyDeclarationAndConst(declaredVar,$1,type);}
+                                        verifyIsConst(declaredVar,$1,type);
+                                        verifyDeclaration(declaredVar,$3,type);
+                                        verifyDeclaration(declaredVar,$5,type);
+                                    }
                                     linkedL = addUnit(linkedL,"operator",$4,"biOperator",""); }
         | IDF EQ num OP IDF SEMI { char *type = getTypeOfVar(declaredVar,$1);
                                     if( strcmp(type,"bool") != 0 && strcmp(type,"int") == 0){
-                                        verifyDeclarationAndConst(declaredVar,$1,type);
-                                        verifyDeclarationAndConst(declaredVar,$5,type);
-                                    }else if(strcmp(type,"float") == 0){
-                                        verifyDeclarationAndConst(declaredVar,$1,"float");
+                                        verifyIsConst(declaredVar,$1,type);
+                                        verifyDeclaration(declaredVar,$5,type);
                                     }
                                     linkedL = addUnit(linkedL,"operator",$4,"biOperator",""); }
         | IDF EQ FLOATnum OP IDF SEMI { char *type = getTypeOfVar(declaredVar,$1);
                                     if( strcmp(type,"bool") != 0 && strcmp(type,"float") == 0){
-                                        verifyDeclarationAndConst(declaredVar,$1,type);
-                                        verifyDeclarationAndConst(declaredVar,$5,type);
-                                    }else if(strcmp(type,"int") == 0){
-                                        verifyDeclarationAndConst(declaredVar,$1,"int");
+                                        verifyIsConst(declaredVar,$1,type);
+                                        verifyDeclaration(declaredVar,$5,type);
                                     }
                                     linkedL = addUnit(linkedL,"operator",$4,"biOperator",""); }
         | IDF EQ IDF OP num SEMI { char *type = getTypeOfVar(declaredVar,$1);
                                     if( strcmp(type,"bool") != 0 && strcmp(type,"int") == 0 ){
-                                        verifyDeclarationAndConst(declaredVar,$1,type);
-                                        verifyDeclarationAndConst(declaredVar,$3,type);
-                                    }else if(strcmp(type,"float") == 0){
-                                        verifyDeclarationAndConst(declaredVar,$1,"float");
+                                        verifyIsConst(declaredVar,$1,type);
+                                        verifyDeclaration(declaredVar,$3,type);
                                     }
                                     linkedL = addUnit(linkedL,"operator",$4,"biOperator",""); } 
         | IDF EQ IDF OP FLOATnum SEMI { char *type = getTypeOfVar(declaredVar,$1);
                                     if( strcmp(type,"bool") != 0 && strcmp(type,"float") == 0 ){
-                                        verifyDeclarationAndConst(declaredVar,$1,type);
-                                        verifyDeclarationAndConst(declaredVar,$3,type);
-                                    }else if(strcmp(type,"int") == 0){
-                                        verifyDeclarationAndConst(declaredVar,$1,"int");
+                                        verifyIsConst(declaredVar,$1,type);
+                                        verifyDeclaration(declaredVar,$3,type);
                                     }
                                     linkedL = addUnit(linkedL,"operator",$4,"biOperator",""); }
         | IDF EQ FLOATnum OP FLOATnum SEMI { char *type = getTypeOfVar(declaredVar,$1);
                                     if( strcmp(type,"bool") != 0 && strcmp(type,"float") == 0 ){
-                                        verifyDeclarationAndConst(declaredVar,$1,type);
-                                    }else if(strcmp(type,"int") == 0){
-                                        verifyDeclarationAndConst(declaredVar,$1,"int");
+                                        verifyIsConst(declaredVar,$1,type);
                                     }
                                     linkedL = addUnit(linkedL,"operator",$4,"biOperator",""); } 
         | IDF EQ num OP num SEMI { char *type = getTypeOfVar(declaredVar,$1);
                                     if( strcmp(type,"bool") != 0 && strcmp(type,"int") == 0 ){
-                                        verifyDeclarationAndConst(declaredVar,$1,type);
-                                    }else if(strcmp(type,"float") == 0){
-                                        verifyDeclarationAndConst(declaredVar,$1,"float");
+                                        verifyIsConst(declaredVar,$1,type);
                                     }
                                     linkedL = addUnit(linkedL,"operator",$4,"biOperator",""); }    
-        | IDF EQ BOOLc SEMI { verifyDeclarationAndConst(declaredVar,$1,"bool"); }
-                                                                      
+        | IDF EQ BOOLc SEMI { verifyIsConst(declaredVar,$1,"bool"); }
+        | IDF EQ num SEMI { verifyIsConst(declaredVar,$1,"int"); }
+        | IDF EQ FLOATnum SEMI { verifyIsConst(declaredVar,$1,"float"); }                                                             
     ;
 
 statements: ifElseS code
@@ -280,11 +279,11 @@ ifElseS: IF LP condition RP LC code RC { linkedL = addUnit(linkedL,"IF-cond",$1,
                                                                                             }
     ;
 
-forS: FOR LP assign condition SEMI counter SEMI RP LC code RC { linkedL = addUnit(linkedL,"FOR-cond",$1,"keyCond","");
+forS: FOR LP assign condition SEMI counter RP LC code RC { linkedL = addUnit(linkedL,"FOR-cond",$1,"keyCond","");
                                                                 linkedL = addUnit(linkedL,"LeftPar",$2,"key","");
-                                                                linkedL = addUnit(linkedL,"RightPar",$8,"key","");
-                                                                linkedL = addUnit(linkedL,"LeftCur",$9,"key","");
-                                                                linkedL = addUnit(linkedL,"RightCur",$11,"key",""); }
+                                                                linkedL = addUnit(linkedL,"RightPar",$7,"key","");
+                                                                linkedL = addUnit(linkedL,"LeftCur",$8,"key","");
+                                                                linkedL = addUnit(linkedL,"RightCur",$10,"key",""); }
     ;
 
 whileS: WHILE LP condition RP LC code RC
@@ -297,15 +296,13 @@ condition: num COMP num  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
     | num COMP IDF  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
     | FLOATnum COMP IDF  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
     | IDF COMP IDF  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
-    | BOOLc "==" IDF  {linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
-    | IDF "==" BOOLc  {linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
-    | BOOLc "==" BOOLc  {linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
+    | BOOLc COMP IDF  {linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
+    | IDF COMP BOOLc  {linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
+    | BOOLc COMP BOOLc  {linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
     ; 
 
-counter: CHAR "++" { linkedL = addUnit(linkedL,"operator","++","counter",""); }
-    | CHAR "--" { linkedL = addUnit(linkedL,"operator","--","counter",""); }
-    | CHAR "/" DIG 
-    | CHAR "*" DIG
+counter: IDF CNT { linkedL = addUnit(linkedL,"operator",$2,"counter",""); }
+    | IDF CNT DIG { linkedL = addUnit(linkedL,"operator",$2,"counter",""); }
     ;
 
 num: NUMBER
@@ -320,7 +317,7 @@ end: END { printf("EXIT PROGRAM .... ");
 
 void yyerror(const char *s) 
 {
-    fprintf(stderr, "Line: %d , SYNTAX ERROR: %s\tits => %s <=",nbrLine,s,yytext);
+    fprintf(stderr, "Line: %d , SYNTAX ERROR: %s\tits => %s <= or After that",nbrLine,s,yytext);
 
     exit(EXIT_FAILURE);
 }

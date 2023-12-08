@@ -23,6 +23,7 @@ boolC "true"|"false"
 
 biOp "+"|"-"|"*"|"/"
 compOp "=="|"<"|">"|"<="|">="
+countOp "++"|"--"|"*"|"/"
 
 str {digit}|{char}
 idf [A-Z]({str}|"_"{str})+
@@ -56,7 +57,7 @@ idf [A-Z]({str}|"_"{str})+
 
 {biOp} { yylval.strV = strdup(yytext); return OP;}
 {compOp} { yylval.strV = strdup(yytext); return COMP;}
-
+{countOp} { yylval.strV = strdup(yytext); return CNT;}
 ";"     { yylval.strV = strdup(yytext); return SEMI;}
 "="     { yylval.strV = strdup(yytext); return EQ;}
 
