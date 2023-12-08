@@ -2,11 +2,13 @@ const float An1r = 5.3;
 int L4c = 10;  // hi //
 float G_9d = -3.4;
 int I2c = 0; 
-begin
+//comment here //begin
 for( L4c = 10 ; L4c < 10 ; I2c ++){
-    if( I2c == true ) { 
-        G_9d = -5.1 + An1r;
+    if( G_9d == true ) { 
         L4c = 6 + 9; // hi //
-        } 
+    } // comment here too //
+    else{
+        G_9d = -5.1 + An1r;
+    }
 }
 end

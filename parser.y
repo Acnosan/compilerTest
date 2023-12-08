@@ -285,29 +285,59 @@ ifElseS: IF LP condition RP LC code RC { linkedL = addUnit(linkedL,"IF-cond",$1,
     ;
 
 forS: FOR LP assign condition SEMI counter RP LC code RC { linkedL = addUnit(linkedL,"FOR-cond",$1,"keyCond","");
-                                                                linkedL = addUnit(linkedL,"LeftPar",$2,"key","");
-                                                                linkedL = addUnit(linkedL,"RightPar",$7,"key","");
-                                                                linkedL = addUnit(linkedL,"LeftCur",$8,"key","");
-                                                                linkedL = addUnit(linkedL,"RightCur",$10,"key",""); }
+                                                            linkedL = addUnit(linkedL,"LeftPar",$2,"key","");
+                                                            linkedL = addUnit(linkedL,"RightPar",$7,"key","");
+                                                            linkedL = addUnit(linkedL,"LeftCur",$8,"key","");
+                                                            linkedL = addUnit(linkedL,"RightCur",$10,"key",""); }
     ;
 
-whileS: WHILE LP condition RP LC code RC
+whileS: WHILE LP condition RP LC code RC { linkedL = addUnit(linkedL,"WHILE-cond",$1,"keyCond","");
+                                            linkedL = addUnit(linkedL,"LeftPar",$2,"key","");
+                                            linkedL = addUnit(linkedL,"RightPar",$4,"key","");
+                                            linkedL = addUnit(linkedL,"LeftCur",$5,"key","");
+                                            linkedL = addUnit(linkedL,"RightCur",$7,"key",""); }
     ;
 
-condition: num COMP num  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
-    | FLOATnum COMP FLOATnum  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
-    | IDF COMP num  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
-    | IDF COMP FLOATnum  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
-    | num COMP IDF  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
-    | FLOATnum COMP IDF  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
-    | IDF COMP IDF  {linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
-    | BOOLc COMP IDF  {linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
-    | IDF COMP BOOLc  {linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
+condition: num COMP num  { linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
+    | FLOATnum COMP FLOATnum  { linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
+    | IDF COMP num  { char *type = getTypeOfVar(declaredVar,$1);
+                    if( strcmp(type,"bool") != 0 && strcmp(type,"int") == 0 )
+                        verifyDeclaration(declaredVar,$1,type);
+                    linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
+    | IDF COMP FLOATnum  { char *type = getTypeOfVar(declaredVar,$1);
+                        if( strcmp(type,"bool") != 0 && strcmp(type,"float") == 0 )
+                            verifyDeclaration(declaredVar,$1,type);
+                        linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
+    | num COMP IDF  { char *type = getTypeOfVar(declaredVar,$3);
+                    if( strcmp(type,"bool") != 0 && strcmp(type,"int") == 0 )
+                        verifyDeclaration(declaredVar,$3,type);
+                    linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
+    | FLOATnum COMP IDF  { char *type = getTypeOfVar(declaredVar,$3);
+                        if( strcmp(type,"bool") != 0 && strcmp(type,"float") == 0 )
+                            verifyDeclaration(declaredVar,$3,type);
+                        linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
+    | IDF COMP IDF  { char *type = getTypeOfVar(declaredVar,$1);
+                    if( strcmp(type,"bool") != 0 ){
+                        verifyDeclaration(declaredVar,$1,type);
+                        verifyDeclaration(declaredVar,$3,type);}
+                    linkedL = addUnit(linkedL,"COMPop",$2,"keyCond",""); }
+    | BOOLc COMP IDF  { char *type = getTypeOfVar(declaredVar,$3);
+                        if( strcmp(type,"bool") == 0)
+                            verifyDeclaration(declaredVar,$3,type);
+                        linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
+    | IDF COMP BOOLc  { char *type = getTypeOfVar(declaredVar,$1);
+                        if( strcmp(type,"bool") == 0)
+                            verifyDeclaration(declaredVar,$1,type);
+                        linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
     | BOOLc COMP BOOLc  {linkedL = addUnit(linkedL,"COMPop","==","keyCond",""); }
     ; 
 
-counter: IDF CNT { linkedL = addUnit(linkedL,"operator",$2,"counter",""); }
-    | IDF CNT DIG { linkedL = addUnit(linkedL,"operator",$2,"counter",""); }
+counter: IDF CNT { char *type = getTypeOfVar(declaredVar,$1);
+                    verifyIsConst(declaredVar,$1,type);
+                    linkedL = addUnit(linkedL,"operator",$2,"counter",""); }
+    | IDF CNT DIG { char *type = getTypeOfVar(declaredVar,$1);
+                    verifyIsConst(declaredVar,$1,type); 
+                    linkedL = addUnit(linkedL,"operator",$2,"counter",""); }
     ;
 
 num: NUMBER
